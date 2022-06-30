@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: echo-server
+  namespace: argocd
+spec:
+  project: default
+  syncPolicy:
+    automated:
+      enabled: true
+      interval: 2m0s
+  source:
+    repoURL: git@github.com:hhtpcd/kubernetes-sandbox.git
+    targetRevision: HEAD
+    path: kubernetes/base/
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: echo-server
