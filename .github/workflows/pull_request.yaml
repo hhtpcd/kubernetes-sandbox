@@ -1,0 +1,23 @@
+name: go test
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - name: test
+        run: |
+          go test -v ./...
+      - name: build
+        run: |
+          go build -o server -v
+      - name: lint-kubernetes
+        run: |
+          go install github.com/yannh/kubeconform/cmd/kubeconform@v0.4.13 \
+            && make kube-lint
