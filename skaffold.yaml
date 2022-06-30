@@ -1,0 +1,15 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: kubernetes-sandbox
+build:
+  local:
+    push: false
+  artifacts:
+  - image: ghcr.io/hhtpcd/echo-server
+    docker:
+      dockerfile: Dockerfile
+deploy:
+  kustomize:
+    paths:
+    - kubernetes/base
