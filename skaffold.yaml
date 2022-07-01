@@ -5,6 +5,7 @@ metadata:
 build:
   local:
     push: false
+    useBuildkit: true
   artifacts:
   - image: ghcr.io/hhtpcd/echo-server
     docker:

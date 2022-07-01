@@ -28,3 +28,9 @@ RUN curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/sk
     && rm -v skaffold
 
 RUN go install github.com/yannh/kubeconform/cmd/kubeconform@v0.4.13
+
+# Install kubectx
+RUN curl -Lo ./kubectx.tar.gz https://github.com/ahmetb/kubectx/releases/download/v0.9.4/kubectx_v0.9.4_linux_x86_64.tar.gz \
+    && tar -xzf ./kubectx.tar.gz \
+    && install -o root -g root -m 755 ./kubectx /usr/local/bin/kubectx \
+    && rm -v ./kubectx.tar.gz
