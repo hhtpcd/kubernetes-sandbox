@@ -34,3 +34,9 @@ RUN curl -Lo ./kubectx.tar.gz https://github.com/ahmetb/kubectx/releases/downloa
     && tar -xzf ./kubectx.tar.gz \
     && install -o root -g root -m 755 ./kubectx /usr/local/bin/kubectx \
     && rm -v ./kubectx.tar.gz
+
+# install grype
+RUN curl -Lo ./grype.tar.gz https://github.com/anchore/grype/releases/download/v0.40.1/grype_0.40.1_linux_amd64.tar.gz \
+    && tar -xzvf ./grype.tar.gz grype \
+    && install -o root -g root -m 755 ./grype /usr/local/bin/grype \
+    && rm -v ./grype.tar.gz

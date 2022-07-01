@@ -44,7 +44,25 @@ can be tested by running
 make test
 ```
 
+## Vulnerability Scanning
 
+In the VSCode Remote Containers configuration `anchore/grype` is installed
+for vulnerability scanning.
+
+For scanning the application packages
+
+```sh
+grype dir:.
+```
+
+And for scanning the container images
+
+```sh
+IMAGE=$(skaffold build -q | jq -r .builds[].tag)
+grype docker:$IMAGE
+```
+
+TODO: Add this to Github Actions.
 
 ## Container Images
 
