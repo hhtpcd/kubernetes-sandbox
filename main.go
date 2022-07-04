@@ -6,11 +6,6 @@ import (
 	"runtime/debug"
 )
 
-var (
-	// Version is the current version of the application.
-	VERSION, GITSHA, BUILD_ID string
-)
-
 func main() {
 	mux := http.NewServeMux()
 
@@ -30,7 +25,9 @@ func main() {
 
 func sendOk(w http.ResponseWriter, r *http.Request) {
 	log.Printf("received request from client: %s\n", r.RemoteAddr)
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status": "ok", "turbo": "activated"}`))
 }
 
 func healthz(w http.ResponseWriter, r *http.Request) {
