@@ -3,6 +3,21 @@
 This repository is a sandbox for development, testing and building of a demo
 Kubernetes application.
 
+- [Prerequisites](#prerequisites)
+- [Kubernetes Clusters](#kubernetes-clusters)
+  - [Local](#local)
+  - [Remote](#remote)
+- [HTTP Echo Server](#http-echo-server)
+- [Local Development Workflow](#local-development-workflow)
+- [Install ArgoCD](#install-argocd)
+- [Deploy Echo Server](#deploy-echo-server)
+- [Github Actions](#github-actions)
+- [Vulnerability Scanning](#vulnerability-scanning)
+- [Releasing Changes](#releasing-changes)
+- [Further Work](#further-work)
+
+## Prerequisites
+
 There are prequisites for using this sandbox:
 - kind
 - kustomize
@@ -13,7 +28,9 @@ There are prequisites for using this sandbox:
 All of these are present in the [VSCode Remote Containers][remote-containers]
 configuration in the `.devcontainer/` folder.
 
-## Kubernetes Cluster
+## Kubernetes Clusters
+
+### Local
 
 The sandbox workflow here uses a Kind cluster to test local changes. This can
 be configured locally with the Makefile command
@@ -22,18 +39,30 @@ be configured locally with the Makefile command
 make start-kube
 ```
 
+### Remote
+
 The ArgoCD components should be installed into a remote Kubernetes cluster, and
 boostrapped with the Application custom resources in `kubernetes/argocd`.
 
+For this sandbox we can start a multi-node cluster with Kind using the
+configuration at `kubernetes/kind`.
+
 ```sh
-kubectl apply -f kubectl/argocd/echo-server-application.yaml
+kind create cluster \
+  --name production-cluster \
+  --image kindest/node:v1.22.9 \
+  --config kubernetes/kind/multi_node.yaml
 ```
 
-This will configure ArgoCD to watch the sandbox repository and sync the
-application resources to the cluster. The default polling period is 3 minutes.
+Once the cluster is up we should have a control-plane and 3 worker nodes.
 
-The configuration watches the `main` branch of the sandbox repository. Changes
-will be sync'd automatically.
+```sh
+NAME                               STATUS   ROLES                  AGE    VERSION
+production-5ksym8t-control-plane   Ready    control-plane,master   149m   v1.22.9
+production-5ksym8t-worker          Ready    <none>                 148m   v1.22.9
+production-5ksym8t-worker2         Ready    <none>                 148m   v1.22.9
+production-5ksym8t-worker3         Ready    <none>                 148m   v1.22.9
+```
 
 ## HTTP Echo Server
 
@@ -44,27 +73,10 @@ can be tested by running
 make test
 ```
 
-## Vulnerability Scanning
+## Local Development Workflow
 
-In the VSCode Remote Containers configuration `anchore/grype` is installed
-for vulnerability scanning.
-
-For scanning the application packages
-
-```sh
-grype dir:.
-```
-
-And for scanning the container images
-
-```sh
-IMAGE=$(skaffold build -q | jq -r .builds[].tag)
-grype docker:$IMAGE
-```
-
-TODO: Add this to Github Actions.
-
-## Container Images
+> ⚠️ Skaffold will use your active Kubernetes context. If this is set as a
+> production cluster you may cause issues or conflicts!
 
 Use `skaffold` to run a local, fast feedback loop for Kubernetes development.
 
@@ -93,7 +105,12 @@ skaffold build
 
 ## Install ArgoCD
 
+> ⚠️ Make sure your Kubernetes context is pointing at the Production/remote
+> cluster to avoid conflicts with your local environment.
+
 Install the full-fat ArgoCD components. Includes Redis, Dex auth server and UI.
+This requires broad permissions in the target cluster for creating these
+resources.
 
 ```sh
 kubectl create namespace argocd
@@ -116,13 +133,47 @@ kubectl port-forward --namespace argocd service/argocd-server :443
 This is an interim way to access the ArgoCD UI before creating an Ingress
 resource with a loadbalancer, valid TLS and user authentication.
 
+## Deploy Echo Server
+
+We can deploy the ArgoCD Application custom resource into the remote cluster.
+
+```sh
+kubectl apply -f kubernetes/argocd/echo-server-application.yaml
+```
+
+This will configure ArgoCD to watch the sandbox repository and sync the
+application resources to the cluster. The default polling period is 3 minutes.
+
+The configuration watches the `main` branch of the sandbox repository. Changes
+will be sync'd automatically.
+
 ## Github Actions
 
 This repository has a Github Actions workflow that will test the application
 when a pull request is opened. There are also validations of the Kubernetes
 manifests.
 
-## Merging to Main
+## Vulnerability Scanning
+
+In the VSCode Remote Containers configuration `anchore/grype` is installed
+for vulnerability scanning.
+
+For scanning the application packages
+
+```sh
+grype dir:.
+```
+
+And for scanning the container images
+
+```sh
+IMAGE=$(skaffold build -q | jq -r .builds[].tag)
+grype docker:$IMAGE
+```
+
+TODO: Add this to Github Actions.
+
+## Releasing Changes
 
 Once pull requests are merged to main the container image will be built and
 published to [ghcr.io/hhtpcd/echo-server][ghcr]. The image is tagged with the 
@@ -136,7 +187,7 @@ the tag that you would like to release.
 This change in the manifest will cause ArgoCD to resync the Kubernetes
 resources.
 
-### Further Work
+## Further Work
 
 More work could be done to
 
