@@ -33,3 +33,4 @@ clean:
 .PHONY: kube-lint
 kube-lint:
 	kustomize build kubernetes/base/ | kubeconform -summary -strict -verbose -kubernetes-version 1.22.9 -ignore-missing-schemas
+	kubeconform -schema-location 'default' -schema-location 'https://raw.githubusercontent.com/hhtpcd/gke-json-schemas/master/{{ .ResourceKind }}_{{ .ResourceAPIVersion }}.json' --summary --verbose kubernetes/argocd/

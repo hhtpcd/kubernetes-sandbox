@@ -6,11 +6,9 @@ metadata:
 spec:
   project: default
   syncPolicy:
-    automated:
-      enabled: true
-      interval: 2m0s
+    automated: {}
   source:
-    repoURL: git@github.com:hhtpcd/kubernetes-sandbox.git
+    repoURL: https://github.com/hhtpcd/kubernetes-sandbox.git
     targetRevision: HEAD
     path: kubernetes/base/
   destination:
