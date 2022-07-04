@@ -17,7 +17,7 @@ spec:
       serviceAccountName: echo-server
       automountServiceAccountToken: false
       containers:
-      - image: ghcr.io/hhtpcd/echo-server:1477d4c
+      - image: ghcr.io/hhtpcd/echo-server:590b675
         name: echo-server
         securityContext:
           privileged: false
